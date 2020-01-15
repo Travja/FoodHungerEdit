@@ -1,0 +1,7 @@
+name: FoodHungerEdit
+author: Travja
+version: 1.0
+main: me.travja.foodedit.Main
+description: Edit how food and hunger work for your server!
+depend: [NBTAPI]
+api-version: 1.14
