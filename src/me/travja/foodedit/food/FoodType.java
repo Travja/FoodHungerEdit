@@ -6,7 +6,8 @@ public enum FoodType {
 
     FRESH("&7[&bFresh&7]"),
     STALE("&7[&9Stale&7]"),
-    MUSTY("&7[&1Musty&7]");
+    MUSTY("&7[&1Musty&7]"),
+    ROTTEN("&7[&cRotten&7]");
 
     private String lore;
     FoodType(String lore) {

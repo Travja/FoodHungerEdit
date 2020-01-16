@@ -26,8 +26,8 @@ public class ItemListener implements Listener {
             return;
 
         ItemStack item = event.getItem();
-        if(FoodManager.isFood(item))
-            event.getPlayer().getInventory().setItemInMainHand(FoodManager.ageFood(item));
+        if (Main.getFoodManager().isFood(item))
+            event.getPlayer().getInventory().setItemInMainHand(Main.getFoodManager().ageFood(item));
 
         //For debug purposes
         /*boolean left = event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK;
@@ -39,30 +39,30 @@ public class ItemListener implements Listener {
 
     @EventHandler
     public void join(PlayerJoinEvent event) {
-        FoodManager.ageFood(event.getPlayer().getInventory());
+        Main.getFoodManager().ageFood(event.getPlayer().getInventory());
     }
 
     @EventHandler
     public void openInv(InventoryOpenEvent event) {
-        FoodManager.ageFood(event.getInventory());
+        Main.getFoodManager().ageFood(event.getInventory());
     }
 
     @EventHandler
     public void closeInv(InventoryCloseEvent event) {
-        FoodManager.ageFood(event.getInventory());
+        Main.getFoodManager().ageFood(event.getInventory());
     }
 
     @EventHandler
     public void hopper(InventoryMoveItemEvent event) {
         ItemStack item = event.getItem();
-        if (!FoodManager.isFood(item))
+        if (!Main.getFoodManager().isFood(item))
             return;
 
         ItemStack match = null;
         Inventory to = event.getDestination(), source = event.getSource();
 
         for (ItemStack toItem : to.getContents()) {
-            if (FoodManager.match(item, toItem) && toItem.getAmount() < toItem.getMaxStackSize()) {
+            if (Main.getFoodManager().match(item, toItem) && toItem.getAmount() < toItem.getMaxStackSize()) {
                 match = toItem;
                 break;
             }
@@ -88,7 +88,7 @@ public class ItemListener implements Listener {
             return;
 
         Item item = event.getItem();
-        if (!FoodManager.isFood(item.getItemStack()))
+        if (!Main.getFoodManager().isFood(item.getItemStack()))
             return;
         ItemStack itemStack = item.getItemStack();
         new BukkitRunnable() {
@@ -96,7 +96,7 @@ public class ItemListener implements Listener {
                 Inventory inv = ((Player) e).getInventory();
                 if (inv.contains(itemStack)) { //TODO Stack items with OLDEST item taking priority.
                     inv.removeItem(itemStack);
-                    inv.addItem(FoodManager.ageFood(itemStack));
+                    inv.addItem(Main.getFoodManager().ageFood(itemStack));
                 }
             }
         }.runTaskLater(Main.getInstance(), 1L);
@@ -109,8 +109,8 @@ public class ItemListener implements Listener {
         if (current == null)
             return;
 
-        if (FoodManager.isFood(current))
-            event.setCurrentItem(FoodManager.ageFood(current));
+        if (Main.getFoodManager().isFood(current))
+            event.setCurrentItem(Main.getFoodManager().ageFood(current));
 
         InventoryAction act = event.getAction();
         //Merge logic
@@ -130,7 +130,7 @@ public class ItemListener implements Listener {
     @EventHandler
     public void inventory(InventoryEvent event) {
         Bukkit.broadcastMessage("InventoryEvent!");
-        FoodManager.ageFood(event.getInventory());
+        Main.getFoodManager().ageFood(event.getInventory());
     }
 
 }
