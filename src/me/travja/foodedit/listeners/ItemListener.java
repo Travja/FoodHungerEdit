@@ -1,5 +1,6 @@
 package me.travja.foodedit.listeners;
 
+import de.tr7zw.nbtapi.NBTItem;
 import me.travja.foodedit.Main;
 import me.travja.foodedit.util.FoodManager;
 import org.bukkit.Bukkit;
@@ -60,8 +61,14 @@ public class ItemListener implements Listener {
 
         ItemStack match = null;
         Inventory to = event.getDestination(), source = event.getSource();
+        Main.getFoodManager().ageFood(to);
+        Main.getFoodManager().ageFood(source);
 
+        int index = -1;
         for (ItemStack toItem : to.getContents()) {
+            index++;
+            if (!Main.getFoodManager().isFood(toItem))
+                continue;
             if (Main.getFoodManager().match(item, toItem) && toItem.getAmount() < toItem.getMaxStackSize()) {
                 match = toItem;
                 break;
@@ -69,11 +76,17 @@ public class ItemListener implements Listener {
         }
         if (match != null) {
             ItemStack finalMatch = match;
+            int finalIndex = index;
+            long oldestStamp = Main.getFoodManager().getOldestStamp(item, match);
+            Main.log("Between the two items, the oldest was made at " + oldestStamp);
             event.setCancelled(true);
 
             new BukkitRunnable() {
                 public void run() {
                     finalMatch.setAmount(finalMatch.getAmount() + item.getAmount());
+                    NBTItem nbt = new NBTItem(finalMatch);
+                    nbt.setLong(FoodManager.TIME_STRING, oldestStamp);
+                    to.setItem(finalIndex, nbt.getItem());
                     source.removeItem(item);
                 }
             }.runTaskLater(Main.getInstance(), 1L);

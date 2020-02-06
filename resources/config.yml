@@ -1,11 +1,13 @@
 #default config.yml
 defaultModifier: 2
-defaultEffect: SLOWNESS.1.5
+defaultEffect: SLOW.1.5
+fullEffects: ["INCREASE_DAMAGE.1.30", "SLOW.1.10"]
+quickFill: CONFUSION.1.5
 
-food: # The health modifiers for different foods (and items)
+food: # The food bar modifiers for different foods (and items)
   BEETROOT: 10
   BLACK_DYE: 1
-  COOKED_BEEF: 4 #TODO gives strength 2 for 1 minute
+  COOKED_BEEF: 4
   COOKED_CHICKEN: 10
   COOKED_COD: 2
   COOKED_MUTTON: 10
@@ -18,17 +20,19 @@ food: # The health modifiers for different foods (and items)
   MUTTON: 10
   POTATO: 10
   PRISMARINE_SHARD: 2 #TODO gives dolphins grace for 5 seconds
-  RAW_BEEF: 2
-  RAW_CHICKEN: 2
-  RAW_COD: 2
-  RAW_PORKCHOP: 2 #TODO nausea for 5 seconds
-  RAW_RABBIT: 2
-  RAW_SALMON: 2
+  BEEF: 2
+  CHICKEN: 2
+  COD: 2
+  PORKCHOP: 2 #TODO nausea for 5 seconds
+  RABBIT: 2
+  SALMON: 2
   SPIDER_EYE: 10 #No poison
+  ROTTEN_FLESH: -8
 
 effects:
-  COOKED_BEEF: STRENGTH.2.60
-  GLISTERING_MELON_SLICE: ... #TODO Implement here.
-  MELON_SLICE: STRENGTH.2.60
+  COOKED_BEEF: INCREASE_DAMAGE.2.60
+  #GLISTERING_MELON_SLICE: ... #TODO Implement here.
+  MELON_SLICE: INCREASE_DAMAGE.2.60
   PRISMARINE_SHARD: DOLPHINS_GRACE.1.5
-  RAW_PORKCHOP: NAUSEA.1.5
+  PORKCHOP: CONFUSION.1.5
+  ROTTEN_FLESH: CONFUSION.1.10

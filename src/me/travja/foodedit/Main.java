@@ -40,10 +40,13 @@ public class Main extends JavaPlugin {
         log.info("Plugin loaded.");
 
         log.info("Edible items include: ");
+        StringBuilder sb = new StringBuilder();
         for (Material mat : Material.values()) {
             if (getFoodManager().isFood(mat))
-                log.info(mat.name());
+                sb.append(mat.name() + ", ");
         }
+        sb.substring(0, sb.length() -2);
+        log.info(sb.toString());
     }
 
     public void onDisable() {
