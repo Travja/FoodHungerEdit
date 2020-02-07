@@ -132,18 +132,18 @@ public class FoodManager {
         for (FoodType type : FoodType.values()) { //Clear out the lore, just in case it's already there so we don't get gigantic lore
             lore.remove(type.getLore());
         }
+        for (String l : (ArrayList<String>) lore.clone()) { //DEBUG
+            if (l.startsWith("Age: "))
+                lore.remove(l);
+        }
         if (debug) {
             World world = Bukkit.getWorlds().get(0); //DEBUG
             long created = nbt.getLong(TIME_STRING);
             long now = world.getFullTime();
             long age = now - created;
-            for (String l : (ArrayList<String>) lore.clone()) { //DEBUG
-                if (l.startsWith("Age: "))
-                    lore.remove(l);
-            }
-            lore.add(getLore(days));
             lore.add("Age: " + age);//DEBUG
         }
+        lore.add(getLore(days));
 
         if (days >= 3) {
             item.setType(Material.ROTTEN_FLESH);
