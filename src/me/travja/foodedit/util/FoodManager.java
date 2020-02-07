@@ -29,7 +29,8 @@ public class FoodManager {
 
     private HashMap<Material, Integer> foodMod = new HashMap<>();
     private HashMap<Material, PotionEffect> effects = new HashMap<>();
-    private ArrayList<PotionEffect> fullEffects = new ArrayList<>();
+    private ArrayList<PotionEffect> fullEffects = new ArrayList<>(),
+            glisteringEffects = new ArrayList<>();
     private PotionEffect quickFill;
     private ArrayList<Material> foods = new ArrayList<>();
 
@@ -227,6 +228,10 @@ public class FoodManager {
         return getEffect(item.getType());
     }
 
+    public ArrayList<PotionEffect> getGlisteringEffects() {
+        return (ArrayList<PotionEffect>) glisteringEffects.clone();
+    }
+
     public ArrayList<PotionEffect> getFullEffects() {
         return (ArrayList<PotionEffect>) fullEffects.clone();
     }
@@ -296,6 +301,16 @@ public class FoodManager {
                     fullEffects.add(extractEffect(eff.split("\\.")));
                 } catch (Exception e) {
                     Main.log("Tried to parse effect '" + Arrays.toString(defEff.split("\\.")) + "' for FULL EFFECTS but couldn't translate it to an effect.");
+                }
+            }
+        }
+        List<String> melon = Main.config().getStringList("effects.GLISTERING_MELON_SLICE");
+        if (!melon.isEmpty()) {
+            for (String eff : melon) {
+                try {
+                    glisteringEffects.add(extractEffect(eff.split("\\.")));
+                } catch (Exception e) {
+                    Main.log("Tried to parse effect '" + Arrays.toString(defEff.split("\\.")) + "' for GLISTERING_MELON_SLICE but couldn't translate it to an effect.");
                 }
             }
         }

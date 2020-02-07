@@ -24,7 +24,7 @@ Day three should be "&7[&1Musty&7]"
 
 ### FOOD ITEMS
 
-- [ ] Glistering_Melon_Slice [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
+- [x] Glistering_Melon_Slice [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
 - [x] [All Food Items should restore 5 Hunger][Poison effects from Spider Eye should be removed] [All other consumable food items not listed should give 1 hunger bar and slowness 1]
 - [x] Mutton
 - [x] Potato

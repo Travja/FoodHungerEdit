@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -16,9 +15,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 public class FoodListener implements Listener {
+
+    private static HashMap<UUID, Integer> foodTime = new HashMap<>();
+    private static boolean running = false;
+    private Random rand = new Random();
 
     @EventHandler
     public void join(PlayerJoinEvent event) {
@@ -28,16 +32,13 @@ public class FoodListener implements Listener {
         }
     }
 
-    private static HashMap<UUID, Integer> foodTime = new HashMap<>();
-    private static boolean running = false;
-
     public static void updateFood() {
         if (!running) {
             running = true;
             new BukkitRunnable() {
                 public void run() {
-                    for(Player player: Bukkit.getOnlinePlayers()) {
-                        if(!foodTime.containsKey(player.getUniqueId()))
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (!foodTime.containsKey(player.getUniqueId()))
                             foodTime.put(player.getUniqueId(), 120);
                     }
                     for (UUID id : foodTime.keySet()) {
@@ -86,10 +87,17 @@ public class FoodListener implements Listener {
         ItemStack item = event.getItem();
 
         int mod = Main.getFoodManager().getFoodMod(item);
-        PotionEffect effect = Main.getFoodManager().getEffect(item);
+        PotionEffect effect;
 
-        event.setFoodLevel(player.getFoodLevel() + mod);//Apply hunger modifier and potion effect
+        if (item.getType() != Material.GLISTERING_MELON_SLICE) {
+            effect = Main.getFoodManager().getEffect(item);
+        } else {
+            ArrayList<PotionEffect> effs = Main.getFoodManager().getGlisteringEffects();
+            effect = effs.get(rand.nextInt(effs.size()));
+        }
+
         applyEffect(player, effect);
+        event.setFoodLevel(player.getFoodLevel() + mod);//Apply hunger modifier
 
         if (zero.contains(player.getUniqueId()) && event.getFoodLevel() >= 20) { //If the player eats to fill in less than 30 seconds
             applyEffect(player, Main.getFoodManager().getQuickFill());
@@ -112,6 +120,9 @@ public class FoodListener implements Listener {
     }
 
     private void applyEffect(Player player, PotionEffect pe) {
+        if (pe == null)
+            return;
+
         if (player.hasPotionEffect(pe.getType()))
             if (player.getPotionEffect(pe.getType()).getDuration() < pe.getDuration())
                 player.removePotionEffect(pe.getType());

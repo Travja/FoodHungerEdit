@@ -18,14 +18,14 @@ food: # The food bar modifiers for different foods (and items)
   COOKED_SALMON: 2
   DRIED_KELP: 10
   GLISTERING_MELON_SLICE: 6 #todo [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
-  MELON_SLICE: 4 #TODO gives strength 2 for 1 minute
+  MELON_SLICE: 4
   MUTTON: 10
   POTATO: 10
-  PRISMARINE_SHARD: 2 #TODO gives dolphins grace for 5 seconds
+  PRISMARINE_SHARD: 2
   BEEF: 2
   CHICKEN: 2
   COD: 2
-  PORKCHOP: 2 #TODO nausea for 5 seconds
+  PORKCHOP: 2
   RABBIT: 2
   SALMON: 2
   SPIDER_EYE: 10 #No poison
@@ -33,8 +33,18 @@ food: # The food bar modifiers for different foods (and items)
 
 effects:
   COOKED_BEEF: INCREASE_DAMAGE.2.60
-  #GLISTERING_MELON_SLICE: ... #TODO Implement here.
   MELON_SLICE: INCREASE_DAMAGE.2.60
   PRISMARINE_SHARD: DOLPHINS_GRACE.1.5
   PORKCHOP: CONFUSION.1.5
   ROTTEN_FLESH: CONFUSION.1.10
+  GLISTERING_MELON_SLICE: [
+    FIRE_RESISTANCE.1.4,
+    BLINDNESS.1.6,
+    SATURATION.1.1,
+    JUMP.1.6,
+    POISON.1.12,
+    REGENERATION.1.8,
+    NIGHT_VISION.1.5,
+    WEAKNESS.1.5,
+    WITHER.1.8
+  ] #TODO Implement here.
