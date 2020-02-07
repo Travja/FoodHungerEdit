@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -24,21 +25,24 @@ public class FoodListener implements Listener {
         //Start timer
         if (!foodTime.containsKey(event.getPlayer().getUniqueId())) {
             foodTime.put(event.getPlayer().getUniqueId(), 120);
-            updateFood();
         }
     }
 
-    private HashMap<UUID, Integer> foodTime = new HashMap<>();
-    private boolean running = false;
+    private static HashMap<UUID, Integer> foodTime = new HashMap<>();
+    private static boolean running = false;
 
-    private void updateFood() {
+    public static void updateFood() {
         if (!running) {
             running = true;
             new BukkitRunnable() {
                 public void run() {
+                    for(Player player: Bukkit.getOnlinePlayers()) {
+                        if(!foodTime.containsKey(player.getUniqueId()))
+                            foodTime.put(player.getUniqueId(), 120);
+                    }
                     for (UUID id : foodTime.keySet()) {
                         Player player = Bukkit.getPlayer(id);
-                        if (player.isOnline()) {
+                        if (player != null && player.isOnline()) {
                             int newTime = foodTime.get(id) - 1;
                             if (newTime <= 0) {
                                 player.setFoodLevel(player.getFoodLevel() - 4);

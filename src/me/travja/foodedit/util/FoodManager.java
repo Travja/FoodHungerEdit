@@ -22,6 +22,8 @@ import java.util.List;
 
 public class FoodManager {
 
+    public static boolean debug = Main.config().getBoolean("debug");
+
     private final long DAY = 24000L;
     public static final String TIME_STRING = "creationDates";
 
@@ -29,6 +31,7 @@ public class FoodManager {
     private HashMap<Material, PotionEffect> effects = new HashMap<>();
     private ArrayList<PotionEffect> fullEffects = new ArrayList<>();
     private PotionEffect quickFill;
+    private ArrayList<Material> foods = new ArrayList<>();
 
     public ItemStack setNBT(ItemStack item) {
         if (item == null)
@@ -40,11 +43,11 @@ public class FoodManager {
     }
 
     public boolean isFood(ItemStack item) {
-        return item != null && item.getType().isEdible();
+        return item != null && (item.getType().isEdible() || foods.contains(item.getType()));
     }
 
     public boolean isFood(Material mat) {
-        return mat.isEdible();
+        return mat.isEdible() || foods.contains(mat);
     }
 
     public boolean match(ItemStack base, ItemStack other) {
@@ -72,7 +75,9 @@ public class FoodManager {
     public int getDaysOld(ItemStack item) {
         if (item == null)
             return 0;
-        NBTItem nbt = new NBTItem(setNBT(item)); //Just in case it hasn't already been given NBT, lets add it before we do anything else
+        NBTItem nbt = new NBTItem(item); //Just in case it hasn't already been given NBT, lets add it before we do anything else
+        if (!nbt.hasKey(TIME_STRING))
+            return -1;
         if (nbt.hasKey("gone") && nbt.getBoolean("gone")) //If it's already aged past 3 days, there is no need to do extra logic
             return 3;
         World world = Bukkit.getWorlds().get(0);
@@ -110,40 +115,41 @@ public class FoodManager {
         if (item == null)
             return null;
         NBTItem nbt = new NBTItem(setNBT(item)); //Just in case it hasn't already been given NBT, lets add it before we do anything else
-        if (nbt.hasKey("gone") && nbt.getBoolean("gone")) //If it's already aged past 3 days, there is no need to do extra logic
+        if (nbt.hasKey("gone") && nbt.getBoolean("gone") && !debug) //If it's already aged past 3 days, there is no need to do extra logic
             return item;
         item = nbt.getItem(); // Update our item to reflect updated NBT
 
-        World world = Bukkit.getWorlds().get(0); //DEBUG
-        long created = nbt.getLong(TIME_STRING);
-        long now = world.getFullTime();
-        long age = now - created; //END DEBUG
 
         int days = getDaysOld(item);
 
         ItemMeta im = item.getItemMeta();
         ArrayList<String> lore = im.hasLore() ? (ArrayList<String>) im.getLore() : new ArrayList<>();
+        if (lore.contains(getLore(days)) && !debug)//If the lore is already set to reflect the current state, there's no need to update it.
+            return item;
+
         for (FoodType type : FoodType.values()) { //Clear out the lore, just in case it's already there so we don't get gigantic lore
             lore.remove(type.getLore());
         }
-        for (String l : (ArrayList<String>) lore.clone()) { //DEBUG
-            if (l.startsWith("Age: "))
-                lore.remove(l);
+        if (debug) {
+            World world = Bukkit.getWorlds().get(0); //DEBUG
+            long created = nbt.getLong(TIME_STRING);
+            long now = world.getFullTime();
+            long age = now - created;
+            for (String l : (ArrayList<String>) lore.clone()) { //DEBUG
+                if (l.startsWith("Age: "))
+                    lore.remove(l);
+            }
+            lore.add(getLore(days));
+            lore.add("Age: " + age);//DEBUG
         }
 
         if (days >= 3) {
             item.setType(Material.ROTTEN_FLESH);
             im = item.getItemMeta();
             im.setDisplayName(ChatColor.DARK_RED + "Crow Food");
-            lore.add(FoodType.ROTTEN.getLore());
-        } else if (days == 2) {
-            lore.add(FoodType.MUSTY.getLore());
-        } else if (days == 1)
-            lore.add(FoodType.STALE.getLore());
-        else
-            lore.add(FoodType.FRESH.getLore());
+        }
 
-        lore.add("Age: " + age);//DEBUG
+
         im.setLore(lore);
         item.setItemMeta(im);
         nbt = new NBTItem(item);
@@ -153,19 +159,33 @@ public class FoodManager {
         return nbt.getItem();
     }
 
+    private String getLore(int days) {
+        if (days >= 3)
+            return FoodType.ROTTEN.getLore();
+        else if (days == 2)
+            return FoodType.MUSTY.getLore();
+        else if (days == 1)
+            return FoodType.STALE.getLore();
+        else
+            return FoodType.FRESH.getLore();
+    }
+
     private ArrayList<Inventory> aged = new ArrayList<>();
 
     public Inventory ageFood(Inventory inv) {
         if (aged.contains(inv))
             return inv;
         ItemStack[] contents = inv.getContents().clone();
-        ItemStack[] newContents = new ItemStack[contents.length];
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
-            if (isFood(item))
-                newContents[i] = ageFood(item);
+            if (isFood(item)) {
+                int initial = getDaysOld(item);
+                ItemStack it = ageFood(item);
+                int current = getDaysOld(it);
+                if ((current > initial || current == -1) || debug) //Only update the items if the day difference has changed.
+                    inv.setItem(i, it);
+            }
         }
-        inv.setContents(newContents);
 
         aged.add(inv); //Limit inventory updates to every 10 seconds
         new BukkitRunnable() {
@@ -229,6 +249,7 @@ public class FoodManager {
             }
 
             int health = Main.config().getInt("food." + key);
+            foods.add(mat);
 
             setHealthMod(mat, health);
         }

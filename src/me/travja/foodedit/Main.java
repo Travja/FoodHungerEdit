@@ -46,6 +46,7 @@ public class Main extends JavaPlugin {
                 sb.append(mat.name() + ", ");
         }
         sb.substring(0, sb.length() -2);
+        FoodListener.updateFood();
         log.info(sb.toString());
     }
 

@@ -4,19 +4,27 @@ import de.tr7zw.nbtapi.NBTItem;
 import me.travja.foodedit.Main;
 import me.travja.foodedit.util.FoodManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 public class ItemListener implements Listener {
 
@@ -26,16 +34,36 @@ public class ItemListener implements Listener {
         if (!event.hasItem())
             return;
 
+        Block bl = event.getClickedBlock();
         ItemStack item = event.getItem();
-        if (Main.getFoodManager().isFood(item))
-            event.getPlayer().getInventory().setItemInMainHand(Main.getFoodManager().ageFood(item));
+        Player player = event.getPlayer();
 
-        //For debug purposes
-        /*boolean left = event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK;
-        ItemStack item = event.getItem();
-        NBTItem nbt = new NBTItem(item);
-        nbt.setLong("creationDates", nbt.getLong("creationDates") + (left ? 24000L : -24000L));
-        event.getPlayer().getInventory().setItemInMainHand(FoodManager.ageFood(nbt.getItem()));*/
+        if (!item.getType().isEdible() && Main.getFoodManager().isFood(item)) {
+            if (bl != null && (bl.getState() instanceof BlockInventoryHolder || bl.getType() == Material.ANVIL))
+                event.setUseItemInHand(Event.Result.DENY);
+
+            if (player.getFoodLevel() < 20 && event.useItemInHand() == Event.Result.DEFAULT) {
+                int newFood = player.getFoodLevel() + Main.getFoodManager().getFoodMod(item);
+                if (newFood > 20) newFood = 20;
+                FoodLevelChangeEvent food = new FoodLevelChangeEvent(player, newFood, item);
+                Bukkit.getPluginManager().callEvent(food);
+
+                if (!food.isCancelled()) {
+                    if (item.getAmount() > 1)
+                        item.setAmount(item.getAmount() - 1);
+                    else
+                        player.getInventory().remove(item);
+                    player.setFoodLevel(newFood);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
+                    Vector dir = player.getLocation().getDirection().normalize().multiply(0.5);
+                    player.getWorld().spawnParticle(Particle.ITEM_CRACK, player.getLocation().clone().add(dir.getX(), 1.4 + dir.getY(), dir.getZ()), 10, 0.1, 0.1, 0.1, 0.06, item);
+                    event.setUseItemInHand(Event.Result.DENY);
+                }
+            }
+        }
+
+        if (Main.getFoodManager().isFood(item) && event.useItemInHand() == Event.Result.DEFAULT)
+            player.getInventory().setItemInMainHand(Main.getFoodManager().ageFood(item));
     }
 
     @EventHandler
@@ -78,7 +106,8 @@ public class ItemListener implements Listener {
             ItemStack finalMatch = match;
             int finalIndex = index;
             long oldestStamp = Main.getFoodManager().getOldestStamp(item, match);
-            Main.log("Between the two items, the oldest was made at " + oldestStamp);
+            if (FoodManager.debug)
+                Main.log("Between the two items, the oldest was made at " + oldestStamp); //DEBUG
             event.setCancelled(true);
 
             new BukkitRunnable() {
@@ -127,7 +156,8 @@ public class ItemListener implements Listener {
 
         InventoryAction act = event.getAction();
         //Merge logic
-        player.sendMessage("InventoryAction: " + act);
+        if (FoodManager.debug)
+            player.sendMessage("InventoryAction: " + act); //DEBUG
         if (act == InventoryAction.COLLECT_TO_CURSOR) {
 
         } else if (act == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
@@ -142,7 +172,8 @@ public class ItemListener implements Listener {
 
     @EventHandler
     public void inventory(InventoryEvent event) {
-        Bukkit.broadcastMessage("InventoryEvent!");
+        if (FoodManager.debug)
+            Bukkit.broadcastMessage("InventoryEvent!"); //DEBUG
         Main.getFoodManager().ageFood(event.getInventory());
     }
 

@@ -1,4 +1,6 @@
 #default config.yml
+debug: true
+
 defaultModifier: 2
 defaultEffect: SLOW.1.5
 fullEffects: ["INCREASE_DAMAGE.1.30", "SLOW.1.10"]
