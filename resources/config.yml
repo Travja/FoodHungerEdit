@@ -1,5 +1,5 @@
 #default config.yml
-debug: true
+debug: false
 
 defaultModifier: 2
 defaultEffect: SLOW.1.5

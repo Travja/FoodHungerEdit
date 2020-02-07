@@ -4,7 +4,7 @@
 
 ## Tasks
 
-- [ ] Allow items to stack when picking up and moving around inventory.
+- [x] Allow items to stack when picking up and moving around inventory.
 - [x] Fighting a user for more than 8 seconds should bring your hunger down by 2.
 - [x] I want a plugin that just adjusts how fast you loose hunger and the hunger gained by eating food/consuming non edible foods.
 - [x] Food should "rot" after 3 minecraft days. It should turn into Rotten Flesh named the following

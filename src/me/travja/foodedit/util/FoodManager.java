@@ -60,7 +60,8 @@ public class FoodManager {
         if (other != null && type == other.getType()) {
             boolean hasMeta = other.hasItemMeta();
             boolean hasName = other.getItemMeta().hasDisplayName();
-            String name = hasMeta ? hasName ? im.getDisplayName() : im.getLocalizedName() : null;
+            ItemMeta im2 = hasMeta ? other.getItemMeta() : null;
+            String name = hasMeta ? hasName ? im2.getDisplayName() : im2.getLocalizedName() : null;
             if (name.equals(title)) {
                 NBTItem nbt1 = new NBTItem(base);
                 NBTItem nbt2 = new NBTItem(other);

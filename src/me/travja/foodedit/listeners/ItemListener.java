@@ -87,61 +87,42 @@ public class ItemListener implements Listener {
         if (!Main.getFoodManager().isFood(item))
             return;
 
-        ItemStack match = null;
         Inventory to = event.getDestination(), source = event.getSource();
-        Main.getFoodManager().ageFood(to);
-        Main.getFoodManager().ageFood(source);
 
-        int index = -1;
-        for (ItemStack toItem : to.getContents()) {
-            index++;
-            if (!Main.getFoodManager().isFood(toItem))
-                continue;
-            if (Main.getFoodManager().match(item, toItem) && toItem.getAmount() < toItem.getMaxStackSize()) {
-                match = toItem;
-                break;
-            }
-        }
-        if (match != null) {
-            ItemStack finalMatch = match;
-            int finalIndex = index;
-            long oldestStamp = Main.getFoodManager().getOldestStamp(item, match);
-            if (FoodManager.debug)
-                Main.log("Between the two items, the oldest was made at " + oldestStamp); //DEBUG
+        if (stackMatch(item, to, source) == null) {
             event.setCancelled(true);
-
             new BukkitRunnable() {
                 public void run() {
-                    finalMatch.setAmount(finalMatch.getAmount() + item.getAmount());
-                    NBTItem nbt = new NBTItem(finalMatch);
-                    nbt.setLong(FoodManager.TIME_STRING, oldestStamp);
-                    to.setItem(finalIndex, nbt.getItem());
                     source.removeItem(item);
                 }
             }.runTaskLater(Main.getInstance(), 1L);
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void pickup(EntityPickupItemEvent event) {
         Entity e = event.getEntity();
 
         if (!(e instanceof Player))
             return;
 
+
+        Player player = (Player) e;
         Item item = event.getItem();
         if (!Main.getFoodManager().isFood(item.getItemStack()))
             return;
-        ItemStack itemStack = item.getItemStack();
-        new BukkitRunnable() {
-            public void run() {
-                Inventory inv = ((Player) e).getInventory();
-                if (inv.contains(itemStack)) { //TODO Stack items with OLDEST item taking priority.
-                    inv.removeItem(itemStack);
-                    inv.addItem(Main.getFoodManager().ageFood(itemStack));
-                }
-            }
-        }.runTaskLater(Main.getInstance(), 1L);
+        ItemStack itemStack = Main.getFoodManager().ageFood(item.getItemStack());
+        if (FoodManager.debug)
+            System.out.println("Picked up item");//DEBUG
+
+
+        Inventory inv = ((Player) e).getInventory();
+        ItemStack left = stackMatch(itemStack, inv, null);
+        if (left == null) {
+            event.setCancelled(true);
+            event.getItem().remove();
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
+        }
     }
 
     @EventHandler //TODO update item if shift clicked. Also allow stacking items. (Oldest overwrites.)
@@ -151,30 +132,150 @@ public class ItemListener implements Listener {
         if (current == null)
             return;
 
-        if (Main.getFoodManager().isFood(current))
-            event.setCurrentItem(Main.getFoodManager().ageFood(current));
-
         InventoryAction act = event.getAction();
-        //Merge logic
+
         if (FoodManager.debug)
-            player.sendMessage("InventoryAction: " + act); //DEBUG
-        if (act == InventoryAction.COLLECT_TO_CURSOR) {
+            player.sendMessage("InventoryAction: " + act + " Item: " + current.getType()); //DEBUG
 
-        } else if (act == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+        //Merge logic
+        if (Main.getFoodManager().isFood(current)) {
+            if (act == InventoryAction.COLLECT_TO_CURSOR) {
 
-        } else if (act == InventoryAction.PLACE_ONE || act == InventoryAction.PLACE_SOME) {
+            } else if (act == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                Inventory from = event.getClickedInventory();
+                Inventory inv1 = event.getView().getTopInventory();
+                Inventory to = from.equals(inv1) ? event.getView().getBottomInventory() : inv1;
+                ItemStack left = stackMatch(current, to, from);
+                if (left != null && to.getType() == InventoryType.CRAFTING) { //TODO Fix this.. Items disappear when shift clicking just in the inventory
+                    //event.setCurrentItem(left);
+                    /*event.setCancelled(true);*/
+                    left = stackMatch(left, from, from, event.getSlot());
+                    if (left == null) {
+                        if (FoodManager.debug) System.out.println("We good man....");
+                        //event.setCurrentItem(left);
+                    } else {
+                        if (FoodManager.debug)
+                            System.out.println("Still items left!");
+                        event.setCancelled(true);
+                        from.setItem(getFirstEmpty(from, event.getSlot() <= 8 ? 9 : 0), left);
+                        event.setCurrentItem(null);
+                    }
+                } else {
+                    event.setCancelled(true);
+                    event.setCurrentItem(left);
+                }
 
-        } else if (act == InventoryAction.SWAP_WITH_CURSOR) {
-
+                new BukkitRunnable() {
+                    public void run() {
+                        ((Player) player).updateInventory();
+                    }
+                }.runTaskLater(Main.getInstance(), 2L);
+            } else if (act == InventoryAction.SWAP_WITH_CURSOR) {
+                ItemStack cursor = event.getCursor();
+                if (Main.getFoodManager().match(cursor, current)) {
+                    event.setCancelled(true);
+                    long oldest = Main.getFoodManager().getOldestStamp(current, cursor);
+                    NBTItem nbt = new NBTItem(current);
+                    nbt.setLong(Main.getFoodManager().TIME_STRING, oldest);
+                    current = nbt.getItem();
+                    if (event.isRightClick()) {
+                        current.setAmount(current.getAmount() + 1);
+                        cursor.setAmount(cursor.getAmount() - 1);
+                    } else if (event.isLeftClick()) {
+                        int extra = current.getMaxStackSize() - current.getAmount();
+                        int leftCursor = cursor.getAmount() - extra;
+                        current.setAmount(current.getAmount() + cursor.getAmount() - (leftCursor > 0 ? leftCursor : 0));
+                        cursor.setAmount(leftCursor);
+                    }
+                    event.setCurrentItem(current);
+                    ((Player) player).updateInventory();
+                }
+            }
         }
-
     }
 
-    @EventHandler
-    public void inventory(InventoryEvent event) {
+    private ItemStack stackMatch(ItemStack item, Inventory inv, Inventory from) {
+        return stackMatch(item, inv, from, -1);
+    }
+
+    private ItemStack stackMatch(ItemStack item, Inventory inv, Inventory from, int slot) {
+        ItemStack match = null;
+
+        Main.getFoodManager().ageFood(inv);
+        if (from != null)
+            Main.getFoodManager().ageFood(from);
+        else
+            item = Main.getFoodManager().ageFood(item);
         if (FoodManager.debug)
-            Bukkit.broadcastMessage("InventoryEvent!"); //DEBUG
-        Main.getFoodManager().ageFood(event.getInventory());
+            Main.log("From inv... " + from + " -- To inv.... " + inv + " with items " + inv.getContents().toString()); //DEBUG
+
+        int index = -1;
+        for (ItemStack toItem : inv.getContents()) {
+            index++;
+            if (!Main.getFoodManager().isFood(toItem) || index == slot)
+                continue;
+            if ((slot <= 8 && slot >= 0) && index <= 8)
+                continue;
+            else if (slot > 8 && index > 8)
+                break;
+
+            if (Main.getFoodManager().match(item, toItem) && toItem.getAmount() < toItem.getMaxStackSize()) {
+                match = toItem;
+                break;
+            }
+        }
+        if (match != null) {
+            long oldestStamp = Main.getFoodManager().getOldestStamp(item, match);
+            if (FoodManager.debug)
+                Main.log("Between the two items, the oldest was made at " + oldestStamp); //DEBUG
+
+            int newAmount = match.getAmount() + item.getAmount();
+            int itAmount = newAmount - match.getMaxStackSize();
+            newAmount = newAmount > match.getMaxStackSize() ? match.getMaxStackSize() : newAmount;
+            match.setAmount(newAmount);
+
+            if (FoodManager.debug) {
+                System.out.println("We have a new stack size of " + newAmount + " and " + itAmount + " excess.");
+            }
+
+
+            NBTItem nbt = new NBTItem(match);
+            nbt.setLong(FoodManager.TIME_STRING, oldestStamp);
+            inv.setItem(index, nbt.getItem());
+
+
+            if (itAmount > 0) {
+                item.setAmount(itAmount);
+                //If we have leftover items, we need a place to put them.
+                return stackMatch(item, inv, from);
+            }
+            return null;
+        } else {
+            if (inv.firstEmpty() != -1) {
+                if (from.equals(inv)) {
+                    return item;
+                } else {
+                    inv.addItem(item);
+                    return null;
+                }
+            } else {
+                return item;
+            }
+        }
+    }
+
+    private int getFirstEmpty(Inventory inv, int start) {
+        if(start == 0)
+            return inv.firstEmpty();
+        else {
+            ItemStack[] contents = inv.getContents();
+            for(int i = start; i < contents.length; i++) {
+                if(contents[i] == null) {
+                    return i;
+                }
+            }
+            return -1;
+        }
     }
 
 }
