@@ -46,7 +46,9 @@ public class FoodListener implements Listener {
                         if (player != null && player.isOnline()) {
                             int newTime = foodTime.get(id) - 1;
                             if (newTime <= 0) {
-                                player.setFoodLevel(player.getFoodLevel() - 4);
+                                int newFood = player.getFoodLevel() - 4;
+                                newFood = newFood < 0 ? 0 : newFood;
+                                player.setFoodLevel(newFood);
                                 newTime = 120;
                             }
                             if (newTime % 15 == 0)
@@ -97,7 +99,9 @@ public class FoodListener implements Listener {
         }
 
         applyEffect(player, effect);
-        event.setFoodLevel(player.getFoodLevel() + mod);//Apply hunger modifier
+        int newFood = player.getFoodLevel() + mod;
+        newFood = newFood > 20 ? 20 : newFood;
+        event.setFoodLevel(newFood);//Apply hunger modifier
 
         if (zero.contains(player.getUniqueId()) && event.getFoodLevel() >= 20) { //If the player eats to fill in less than 30 seconds
             applyEffect(player, Main.getFoodManager().getQuickFill());

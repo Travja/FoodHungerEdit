@@ -1,5 +1,6 @@
 package me.travja.foodedit;
 
+import me.travja.foodedit.listeners.CombatListener;
 import me.travja.foodedit.listeners.FoodListener;
 import me.travja.foodedit.listeners.ItemListener;
 import me.travja.foodedit.util.FoodManager;
@@ -76,6 +77,7 @@ public class Main extends JavaPlugin {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new ItemListener(), this);
         pm.registerEvents(new FoodListener(), this);
+        pm.registerEvents(new CombatListener(), this);
     }
 
 

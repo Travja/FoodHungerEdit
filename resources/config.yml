@@ -17,7 +17,7 @@ food: # The food bar modifiers for different foods (and items)
   COOKED_RABBIT: 2
   COOKED_SALMON: 2
   DRIED_KELP: 10
-  GLISTERING_MELON_SLICE: 6 #todo [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
+  GLISTERING_MELON_SLICE: 6
   MELON_SLICE: 4
   MUTTON: 10
   POTATO: 10
@@ -28,7 +28,7 @@ food: # The food bar modifiers for different foods (and items)
   PORKCHOP: 2
   RABBIT: 2
   SALMON: 2
-  SPIDER_EYE: 10 #No poison
+  SPIDER_EYE: 10
   ROTTEN_FLESH: -8
 
 effects:

@@ -198,7 +198,7 @@ public class FoodManager {
         return inv;
     }
 
-    public void setHealthMod(Material mat, int mod) {
+    public void setFoodMod(Material mat, int mod) {
         foodMod.put(mat, mod);
     }
 
@@ -256,14 +256,14 @@ public class FoodManager {
             int health = Main.config().getInt("food." + key);
             foods.add(mat);
 
-            setHealthMod(mat, health);
+            setFoodMod(mat, health);
         }
 
         if (Main.config().contains("defaultModifier")) {
             int defMod = Main.config().getInt("defaultModifier");
-            setHealthMod(Material.AIR, defMod);
+            setFoodMod(Material.AIR, defMod);
         } else
-            setHealthMod(Material.AIR, 2);
+            setFoodMod(Material.AIR, 2);
 
 
         //Load Effects
