@@ -181,10 +181,9 @@ public class FoodManager {
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (isFood(item)) {
-                int initial = getDaysOld(item);
+                ItemStack initial = item.clone();
                 ItemStack it = ageFood(item);
-                int current = getDaysOld(it);
-                if ((current > initial || current == -1) || debug) //Only update the items if the day difference has changed.
+                if (!initial.equals(it) || debug) //Only update the items if the day difference has changed.
                     inv.setItem(i, it);
             }
         }
