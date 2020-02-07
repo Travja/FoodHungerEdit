@@ -1,6 +1,9 @@
 #FoodHungerEdit
+
 [Download Latest Build](https://github.com/Travja/FoodHungerEdit/raw/master/builds/FoodHungerEdit.jar)
+
 ##Tasks
+
 - [ ] Fighting a user for more than 8 seconds should bring your hunger down by 2.
 - [ ] Allow items to stack when picking up and moving around inventory.
 - [x] I want a plugin that just adjusts how fast you loose hunger and the hunger gained by eating food/consuming non edible foods.
@@ -20,6 +23,7 @@ Day three should be "&7[&1Musty&7]"
 - [x] Having 0 hunger and eating so your bar is full in under 30 seconds should give you nausea for 5 seconds. [Optional. its not needed but would be cool!]
 
 ###FOOD ITEMS
+
 - [ ] Glistering_Melon_Slice [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
 - [x] [All Food Items should restore 5 Hunger][Poison effects from Spider Eye should be removed] [All other consumable food items not listed should give 1 hunger bar and slowness 1]
 - [x] Mutton
