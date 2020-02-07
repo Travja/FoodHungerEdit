@@ -1,8 +1,8 @@
-#FoodHungerEdit
+# FoodHungerEdit
 
 [Download Latest Build](https://github.com/Travja/FoodHungerEdit/raw/master/builds/FoodHungerEdit.jar)
 
-##Tasks
+## Tasks
 
 - [ ] Fighting a user for more than 8 seconds should bring your hunger down by 2.
 - [ ] Allow items to stack when picking up and moving around inventory.
@@ -22,7 +22,7 @@ Day three should be "&7[&1Musty&7]"
 - [x] Making your hunger bar full by eating should give you strength 1 for 30 seconds. but should give you slowness 1 for 10 seconds as a "you are full" effect.
 - [x] Having 0 hunger and eating so your bar is full in under 30 seconds should give you nausea for 5 seconds. [Optional. its not needed but would be cool!]
 
-###FOOD ITEMS
+### FOOD ITEMS
 
 - [ ] Glistering_Melon_Slice [Same effects as suspicious stew. Randomized effect given when eaten if possible] [Only gives 3 hunger bars]
 - [x] [All Food Items should restore 5 Hunger][Poison effects from Spider Eye should be removed] [All other consumable food items not listed should give 1 hunger bar and slowness 1]
