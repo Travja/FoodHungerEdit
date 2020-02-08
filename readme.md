@@ -2,6 +2,8 @@
 
 [Download Latest Build](https://github.com/Travja/FoodHungerEdit/raw/master/builds/FoodHungerEdit.jar)
 
+[**NBTAPI**](https://www.spigotmc.org/resources/nbt-api.7939/) is a required dependecy. The plugin **will not** work without it.
+
 ## Tasks
 
 - [x] Allow items to stack when picking up and moving around inventory.
