@@ -5,6 +5,9 @@ defaultModifier: 2
 defaultEffect: SLOW.1.5
 fullEffects: ["INCREASE_DAMAGE.1.30", "SLOW.1.10"]
 quickFill: CONFUSION.1.5
+stageTime: 576000
+removeDecay: true
+disableCampfire: true
 
 food: # The food bar modifiers for different foods (and items)
   BEETROOT: 10
@@ -47,4 +50,4 @@ effects:
     NIGHT_VISION.1.5,
     WEAKNESS.1.5,
     WITHER.1.8
-  ] #TODO Implement here.
+  ]

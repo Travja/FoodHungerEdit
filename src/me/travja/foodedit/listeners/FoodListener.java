@@ -3,11 +3,14 @@ package me.travja.foodedit.listeners;
 import me.travja.foodedit.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockCookEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -20,6 +23,7 @@ import java.util.UUID;
 
 public class FoodListener implements Listener {
 
+    private final boolean disableCampfire = Main.config().getBoolean("disableCampfire");
     private static HashMap<UUID, Integer> foodTime = new HashMap<>();
     private static boolean running = false;
     private Random rand = new Random();
@@ -30,6 +34,11 @@ public class FoodListener implements Listener {
         if (!foodTime.containsKey(event.getPlayer().getUniqueId())) {
             foodTime.put(event.getPlayer().getUniqueId(), 120);
         }
+    }
+
+    @EventHandler
+    public void quit(PlayerQuitEvent event) {
+        foodTime.remove(event.getPlayer().getUniqueId());
     }
 
     public static void updateFood() {
@@ -54,6 +63,8 @@ public class FoodListener implements Listener {
                             if (newTime % 15 == 0)
                                 Main.getFoodManager().ageFood(player.getInventory());
                             foodTime.put(id, newTime);
+                        } else {
+                            foodTime.remove(id);
                         }
                     }
                 }
@@ -121,6 +132,13 @@ public class FoodListener implements Listener {
                 }
             }.runTaskLater(Main.getInstance(), 3L);
         }
+    }
+
+    @EventHandler
+    public void blockCook(BlockCookEvent event) {
+        Block b = event.getBlock();
+        if (b.getType() == Material.CAMPFIRE && disableCampfire)
+            event.setCancelled(true);
     }
 
     private void applyEffect(Player player, PotionEffect pe) {

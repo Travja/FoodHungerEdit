@@ -112,6 +112,7 @@ public class ItemListener implements Listener {
         if (!Main.getFoodManager().isFood(item.getItemStack()))
             return;
         ItemStack itemStack = Main.getFoodManager().ageFood(item.getItemStack());
+        item.setItemStack(itemStack);
         if (FoodManager.debug)
             System.out.println("Picked up item");//DEBUG
 
