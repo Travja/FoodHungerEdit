@@ -125,7 +125,7 @@ public class FoodManager {
 
         int stage = getStage(item);
 
-        if (stage >= 4 && REMOVE_DECAY) {
+        if (stage > 4 && REMOVE_DECAY) {
             item.setAmount(0);
             return item;
         }
