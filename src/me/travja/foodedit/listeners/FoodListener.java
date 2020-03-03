@@ -55,7 +55,7 @@ public class FoodListener implements Listener {
                         if (player != null && player.isOnline()) {
                             int newTime = foodTime.get(id) - 1;
                             if (newTime <= 0) {
-                                int newFood = player.getFoodLevel() - 4;
+                                int newFood = player.getFoodLevel() - 2;
                                 newFood = newFood < 0 ? 0 : newFood;
                                 player.setFoodLevel(newFood);
                                 newTime = 120;
