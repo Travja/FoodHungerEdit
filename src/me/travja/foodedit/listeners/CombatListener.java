@@ -26,10 +26,8 @@ public class CombatListener implements Listener {
         Entity e = event.getEntity();
         if (FoodManager.debug)
             System.out.println("Damage: " + event.getDamage());
-        if (d instanceof Player) {
+        if (d instanceof Player && e instanceof Player) {
             checkCombat((Player) d);
-        }
-        if (e instanceof Player) {
             checkCombat((Player) e);
         }
     }
